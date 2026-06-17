@@ -23,9 +23,25 @@
 
 | 模块 | 描述 |
 | ---- | ---- |
-| 🔒 门锁 | 状态展示与控制 |
+| 🔒 门锁 | 状态展示与控制（`doorLock`） |
 | 🌱 土壤温湿度 | 显示土壤温湿度（`soiltem` / `soilhum`） |
 | 🫧 二氧化碳 | 显示 CO₂ 浓度（`co2`） |
+| 🌫 PM2.5 | 显示 PM2.5 浓度（`PM2.5`） |
+| 🪟 遮阳板 | 状态展示与控制（`sunshade`） |
+| 🛢 可燃气体 | 显示可燃气体浓度（`flamGas`） |
+
+### 语音助手 🎤
+
+主页独立分组，点击进入语音助手页面，按住按钮说话，松开后自动通过百度语音识别 REST API 解析为文本，命中关键词后通过 MQTT 发送对应控制指令：
+
+| 设备 | 示例指令 |
+| ---- | ---- |
+| 门锁 | 开门 / 打开门锁 / 关门 / 锁门 |
+| 灯光 | 打开灯光一 / 打开第二盏灯 / 打开所有灯 / 关闭灯光 |
+| 风扇 | 打开风扇一档 / 打开风扇二挡 / 打开风扇三档 / 关闭风扇 |
+| 报警器 | 打开报警器 / 关闭报警器 |
+
+录音格式：16kHz / 16bit / 单声道 PCM；识别走 `vop.baidu.com/server_api`，token 走 `aip.baidubce.com/oauth/2.0/token`。`voicepage.h` 顶部用 `VOICE_*_MODE` 宏控制每类指令走云端还是硬件 topic。
 
 ### 自动控制
 
@@ -84,7 +100,14 @@ home_client/
 ├── doorlockpage.{h,cpp}     门锁
 ├── soilpage.{h,cpp}         土壤温湿度
 ├── co2page.{h,cpp}          二氧化碳
+├── pm25page.{h,cpp}         PM2.5
+├── sunshadepage.{h,cpp}     遮阳板
+├── flamgaspage.{h,cpp}      可燃气体
 ├── autocontrol.{h,cpp}      自动控制器
+├── voicepage.{h,cpp}        语音助手页面
+├── audiocapture.{h,cpp}     录音（QAudioInput → PCM）
+├── speechrecognition.{h,cpp} 百度语音识别封装
+├── httppost.{h,cpp}         同步 HTTP POST 工具
 └── home_client.pro
 ```
 
