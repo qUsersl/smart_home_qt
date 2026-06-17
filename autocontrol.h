@@ -43,6 +43,7 @@ public slots:
     void onUserFanToggled(int level, int id);
     void onUserLedToggled(bool on, int id);
     void onUserPeopleToggled(bool on, int id);
+    void onUserIntrusionToggled(bool on, int id);
     void onUserFireToggled(bool on, int id);
 
 signals:

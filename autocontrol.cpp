@@ -35,8 +35,9 @@ void AutoController::setEnabled(bool on)
     m_ledIntent = -1;
 
     if (on) {
-        // 自动模式打开 → 立即开启人体检测和火焰报警
+        // 自动模式打开 → 立即开启人体检测、闯入检测和火焰报警
         m_peoplePage->setEnabledByAuto(true);
+        m_peoplePage->setIntrusionEnabledByAuto(true);
         m_firePage->setEnabledByAuto(true);
         // 风扇和灯光的状态依赖下一次温度/光照上报后再决定
     }
@@ -109,6 +110,15 @@ void AutoController::onUserPeopleToggled(bool on, int id)
 {
     Q_UNUSED(id)
     if (!m_enabled) return;
+    if (!on)
+        setEnabled(false);
+}
+
+void AutoController::onUserIntrusionToggled(bool on, int id)
+{
+    Q_UNUSED(id)
+    if (!m_enabled) return;
+    // 自动模式期望闯入检测一直开启，用户关闭即冲突
     if (!on)
         setEnabled(false);
 }

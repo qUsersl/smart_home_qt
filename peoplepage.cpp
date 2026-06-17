@@ -2,6 +2,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFrame>
+#include <QMessageBox>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -166,6 +167,21 @@ PeoplePage::PeoplePage(QMqttClient *mqtt, QWidget *parent)
                 this,     &PeoplePage::userToggled);
     }
 
+    // 闯入检测分隔线
+    QFrame *line2 = new QFrame(this);
+    line2->setFrameShape(QFrame::HLine);
+    line2->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(line2);
+
+    for (int i = 0; i < INTRUSION_COUNT; ++i) {
+        m_intrusionRows[i] = new IntrusionRow(i, mqtt, this);
+        layout->addWidget(m_intrusionRows[i]);
+        connect(m_intrusionRows[i], &IntrusionRow::intrusionDetected,
+                this,              &PeoplePage::onIntrusionDetected);
+        connect(m_intrusionRows[i], &IntrusionRow::userToggled,
+                this,              &PeoplePage::userIntrusionToggled);
+    }
+
     layout->addStretch();
 
     connect(btnBack, &QPushButton::clicked, this, &PeoplePage::backRequested);
@@ -175,10 +191,146 @@ void PeoplePage::onMessageReceived(QByteArray data)
 {
     for (int i = 0; i < PEOPLE_COUNT; ++i)
         m_rows[i]->onMessageReceived(data);
+    for (int i = 0; i < INTRUSION_COUNT; ++i)
+        m_intrusionRows[i]->onMessageReceived(data);
+}
+
+void PeoplePage::onIntrusionDetected(int id)
+{
+    QMessageBox::warning(nullptr, "闯入报警",
+                         QString("⚠ 检测到闯入！\n传感器编号：%1").arg(id));
 }
 
 void PeoplePage::setEnabledByAuto(bool on, int id)
 {
     if (id >= 0 && id < PEOPLE_COUNT)
         m_rows[id]->setEnabledByAuto(on);
+}
+
+void PeoplePage::setIntrusionEnabledByAuto(bool on, int id)
+{
+    if (id >= 0 && id < INTRUSION_COUNT)
+        m_intrusionRows[id]->setEnabledByAuto(on);
+}
+
+// ─── IntrusionRow ─────────────────────────────────────────
+
+IntrusionRow::IntrusionRow(int id, QMqttClient *mqtt, QWidget *parent)
+    : QWidget(parent)
+    , m_id(id)
+    , m_state(false)
+    , m_intruded(false)
+    , m_mqtt(mqtt)
+{
+    QHBoxLayout *layout = new QHBoxLayout(this);
+    layout->setContentsMargins(8, 4, 8, 4);
+    layout->setSpacing(12);
+
+    m_lblIndicator = new QLabel("●", this);
+    m_lblIndicator->setFixedSize(28, 28);
+    m_lblIndicator->setAlignment(Qt::AlignCenter);
+
+    QLabel *lblName = new QLabel(QString("闯入检测 %1").arg(id + 1), this);
+    QFont f = lblName->font();
+    f.setPointSize(12);
+    lblName->setFont(f);
+
+    m_lblStatus = new QLabel("未启用", this);
+    m_lblStatus->setFont(f);
+    m_lblStatus->setMinimumWidth(110);
+    m_lblStatus->setAlignment(Qt::AlignCenter);
+
+    m_btnToggle = new QPushButton("开启", this);
+    m_btnToggle->setFixedWidth(72);
+
+    layout->addWidget(m_lblIndicator);
+    layout->addWidget(lblName);
+    layout->addStretch();
+    layout->addWidget(m_lblStatus);
+    layout->addWidget(m_btnToggle);
+
+    updateIndicator();
+    connect(m_btnToggle, &QPushButton::clicked, this, &IntrusionRow::onToggleClicked);
+}
+
+QString IntrusionRow::pubTopic() const
+{
+    return (INTRUSION_MODE == 0) ? MQTT_CLOUD_PUB : MQTT_HW_PUB;
+}
+
+void IntrusionRow::updateIndicator()
+{
+    if (!m_state) {
+        m_lblIndicator->setStyleSheet("color: gray; font-size: 22px;");
+        m_lblStatus->setText("未启用");
+        m_lblStatus->setStyleSheet("color:#aaa;");
+        m_btnToggle->setText("开启");
+    } else if (m_intruded) {
+        m_lblIndicator->setStyleSheet("color: #ff3030; font-size: 22px;");
+        m_lblStatus->setText("⚠ 检测到闯入");
+        m_lblStatus->setStyleSheet("color:#ff3030; font-weight:bold;");
+        m_btnToggle->setText("关闭");
+    } else {
+        m_lblIndicator->setStyleSheet("color: #30c060; font-size: 22px;");
+        m_lblStatus->setText("正常");
+        m_lblStatus->setStyleSheet("color:#1f8a4c;");
+        m_btnToggle->setText("关闭");
+    }
+}
+
+void IntrusionRow::publishState(bool on)
+{
+    QJsonObject obj;
+    obj["device"] = "intrusion_alarm";
+    obj["status"] = on;
+    obj["id"]     = m_id;
+    m_mqtt->publish(QMqttTopicName(pubTopic()),
+                    QJsonDocument(obj).toJson(QJsonDocument::Compact));
+}
+
+void IntrusionRow::onToggleClicked()
+{
+    m_state = !m_state;
+    if (!m_state)
+        m_intruded = false;
+    updateIndicator();
+    publishState(m_state);
+    emit userToggled(m_state, m_id);
+}
+
+void IntrusionRow::setEnabledByAuto(bool on)
+{
+    if (m_state == on) return;
+    m_state = on;
+    if (!m_state)
+        m_intruded = false;
+    updateIndicator();
+    publishState(m_state);
+}
+
+void IntrusionRow::onMessageReceived(QByteArray data)
+{
+    QJsonObject obj = QJsonDocument::fromJson(data).object();
+    if (obj.value("id").toInt() != m_id)
+        return;
+
+    QString device = obj.value("device").toString();
+
+    if (device == "intrusion_alarm") {
+        // 开关状态回写
+        m_state = obj.value("status").toBool();
+        if (!m_state)
+            m_intruded = false;
+        updateIndicator();
+    } else if (device == "intrusion") {
+        // 闯入检测结果
+        bool detected = obj.value("status").toBool();
+        bool wasOff   = !m_intruded;
+        m_intruded = detected;
+        updateIndicator();
+
+        // 仅在已启用 && 由无 → 有跳变时弹一次报警
+        if (m_state && detected && wasOff)
+            emit intrusionDetected(m_id);
+    }
 }

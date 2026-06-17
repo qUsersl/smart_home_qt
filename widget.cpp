@@ -335,6 +335,8 @@ Widget::Widget(QWidget *parent)
             m_autoCtl,    &AutoController::onUserLedToggled);
     connect(m_peoplePage, &PeoplePage::userToggled,
             m_autoCtl,    &AutoController::onUserPeopleToggled);
+    connect(m_peoplePage, &PeoplePage::userIntrusionToggled,
+            m_autoCtl,    &AutoController::onUserIntrusionToggled);
     connect(m_firePage,   &FirePage::userToggled,
             m_autoCtl,    &AutoController::onUserFireToggled);
 
@@ -440,6 +442,8 @@ void Widget::onMessageReceived(QByteArray data)
     else if (device == "people_detect")
         m_peoplePage->onMessageReceived(data);
     else if (device == "people")
+        m_peoplePage->onMessageReceived(data);
+    else if (device == "intrusion_alarm" || device == "intrusion")
         m_peoplePage->onMessageReceived(data);
     else if (device == "fire" || device == "fire_alarm")
         m_firePage->onMessageReceived(data);
