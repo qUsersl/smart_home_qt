@@ -69,8 +69,8 @@ void PeopleRow::updateIntrudeLabel()
         m_lblIntrude->setText("未启用");
         m_lblIntrude->setStyleSheet("color:#aaa;");
     } else if (m_intruded) {
-        m_lblIntrude->setText("⚠ 检测到闯入");
-        m_lblIntrude->setStyleSheet("color:#ff3030; font-weight:bold;");
+        m_lblIntrude->setText("有人");
+        m_lblIntrude->setStyleSheet("color:#ff8c00; font-weight:bold;");
     } else {
         m_lblIntrude->setText("无人");
         m_lblIntrude->setStyleSheet("color:#1f8a4c;");

@@ -11,7 +11,7 @@
 #define PEOPLE_MODE  1
 
 // 指定闯入检测模块使用的 topic：0 = 云端，1 = 硬件
-#define INTRUSION_MODE  0
+#define INTRUSION_MODE  1
 
 // 人体检测器数量
 #define PEOPLE_COUNT 1
