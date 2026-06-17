@@ -1,0 +1,30 @@
+# Qt 构建产物
+build-*/
+*.pro.user
+*.pro.user.*
+
+# 编译中间产物
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+*.a
+*.lib
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+Makefile*
+.qmake.stash
+.qmake.cache
+*.autosave
+object_script.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
