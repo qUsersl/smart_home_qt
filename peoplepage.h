@@ -22,7 +22,6 @@ public:
     void setEnabledByAuto(bool on);   // 自动控制器调用，强制设为开启/关闭
 
 signals:
-    void intrusionDetected(int id);
     void userToggled(bool on, int id); // 用户手动切换
 
 private slots:
@@ -55,9 +54,6 @@ public:
 signals:
     void backRequested();
     void userToggled(bool on, int id);
-
-private slots:
-    void onIntrusionDetected(int id);
 
 private:
     PeopleRow *m_rows[PEOPLE_COUNT];

@@ -2,7 +2,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFrame>
-#include <QMessageBox>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -125,15 +124,9 @@ void PeopleRow::onMessageReceived(QByteArray data)
         updateIndicator();
         updateIntrudeLabel();
     } else if (device == "people") {
-        // 闯入检测结果
-        bool detected = obj.value("status").toBool();
-        bool wasOff   = !m_intruded;
-        m_intruded = detected;
+        // 闯入检测结果：仅更新界面，不弹窗
+        m_intruded = obj.value("status").toBool();
         updateIntrudeLabel();
-
-        // 仅在检测器开启 && 闯入由无 → 有时弹一次报警
-        if (m_state && detected && wasOff)
-            emit intrusionDetected(m_id);
     }
 }
 
@@ -169,8 +162,6 @@ PeoplePage::PeoplePage(QMqttClient *mqtt, QWidget *parent)
     for (int i = 0; i < PEOPLE_COUNT; ++i) {
         m_rows[i] = new PeopleRow(i, mqtt, this);
         layout->addWidget(m_rows[i]);
-        connect(m_rows[i], &PeopleRow::intrusionDetected,
-                this,     &PeoplePage::onIntrusionDetected);
         connect(m_rows[i], &PeopleRow::userToggled,
                 this,     &PeoplePage::userToggled);
     }
@@ -184,12 +175,6 @@ void PeoplePage::onMessageReceived(QByteArray data)
 {
     for (int i = 0; i < PEOPLE_COUNT; ++i)
         m_rows[i]->onMessageReceived(data);
-}
-
-void PeoplePage::onIntrusionDetected(int id)
-{
-    QMessageBox::warning(nullptr, "人体闯入报警",
-                         QString("⚠ 检测到人体闯入！\n传感器编号：%1").arg(id));
 }
 
 void PeoplePage::setEnabledByAuto(bool on, int id)

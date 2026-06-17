@@ -18,6 +18,9 @@ SOURCES += \
     soilpage.cpp \
     peoplepage.cpp \
     co2page.cpp \
+    pm25page.cpp \
+    sunshadepage.cpp \
+    flamgaspage.cpp \
     firepage.cpp \
     alarmpage.cpp \
     autocontrol.cpp \
@@ -32,6 +35,9 @@ HEADERS += \
     soilpage.h \
     peoplepage.h \
     co2page.h \
+    pm25page.h \
+    sunshadepage.h \
+    flamgaspage.h \
     firepage.h \
     alarmpage.h \
     autocontrol.h \

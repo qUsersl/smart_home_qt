@@ -179,10 +179,16 @@ Widget::Widget(QWidget *parent)
     QPushButton *btnDoorLock = makeCardButton("🔒", "门锁",       "cloud", homePage);
     QPushButton *btnSoil     = makeCardButton("🌱", "土壤温湿度", "cloud", homePage);
     QPushButton *btnCo2      = makeCardButton("🫧", "二氧化碳",   "cloud", homePage);
+    QPushButton *btnPm25     = makeCardButton("🌫", "PM2.5",      "cloud", homePage);
+    QPushButton *btnSunshade = makeCardButton("🪟", "遮阳板",     "cloud", homePage);
+    QPushButton *btnFlamGas  = makeCardButton("🛢", "可燃气体",   "cloud", homePage);
 
     gridCloud->addWidget(btnDoorLock, 0, 0);
     gridCloud->addWidget(btnSoil,     0, 1);
     gridCloud->addWidget(btnCo2,      0, 2);
+    gridCloud->addWidget(btnPm25,     1, 0);
+    gridCloud->addWidget(btnSunshade, 1, 1);
+    gridCloud->addWidget(btnFlamGas,  1, 2);
     homeLayout->addLayout(gridCloud);
 
     homeLayout->addSpacing(12);
@@ -278,6 +284,18 @@ Widget::Widget(QWidget *parent)
     m_firePage = new FirePage(mqtt);
     m_stack->addWidget(m_firePage);   // index 9
 
+    // page 10：PM2.5 页
+    m_pm25Page = new Pm25Page(mqtt);
+    m_stack->addWidget(m_pm25Page);   // index 10
+
+    // page 11：遮阳板页
+    m_sunshadePage = new SunshadePage(mqtt);
+    m_stack->addWidget(m_sunshadePage); // index 11
+
+    // page 12：可燃气体页
+    m_flamGasPage = new FlamGasPage(mqtt);
+    m_stack->addWidget(m_flamGasPage);  // index 12
+
     connect(btnLed,         &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(1); });
     connect(m_ledPage,      &LedPage::backRequested,      this, [this]{ m_stack->setCurrentIndex(0); });
     connect(btnFan,         &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(2); });
@@ -296,6 +314,12 @@ Widget::Widget(QWidget *parent)
     connect(m_co2Page,      &Co2Page::backRequested,      this, [this]{ m_stack->setCurrentIndex(0); });
     connect(btnFire,        &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(9); });
     connect(m_firePage,     &FirePage::backRequested,     this, [this]{ m_stack->setCurrentIndex(0); });
+    connect(btnPm25,        &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(10); });
+    connect(m_pm25Page,     &Pm25Page::backRequested,     this, [this]{ m_stack->setCurrentIndex(0); });
+    connect(btnSunshade,    &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(11); });
+    connect(m_sunshadePage, &SunshadePage::backRequested, this, [this]{ m_stack->setCurrentIndex(0); });
+    connect(btnFlamGas,     &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(12); });
+    connect(m_flamGasPage,  &FlamGasPage::backRequested,  this, [this]{ m_stack->setCurrentIndex(0); });
     // ─────────────────────────────────────────────────────
 
     // ── 自动控制器接线 ──
@@ -429,6 +453,12 @@ void Widget::onMessageReceived(QByteArray data)
         m_soilPage->onMessageReceived(data);
     else if (obj.contains("co2"))
         m_co2Page->onMessageReceived(data);
+    else if (obj.contains("PM2.5"))
+        m_pm25Page->onMessageReceived(data);
+    else if (obj.contains("sunshade"))
+        m_sunshadePage->onMessageReceived(data);
+    else if (obj.contains("flamGas"))
+        m_flamGasPage->onMessageReceived(data);
 }
 
 void Widget::onConfigureThresholds()

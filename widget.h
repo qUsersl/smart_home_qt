@@ -12,6 +12,9 @@
 #include "soilpage.h"
 #include "peoplepage.h"
 #include "co2page.h"
+#include "pm25page.h"
+#include "sunshadepage.h"
+#include "flamgaspage.h"
 #include "firepage.h"
 #include "alarmpage.h"
 #include "autocontrol.h"
@@ -49,6 +52,9 @@ private:
     SoilPage       *m_soilPage;
     PeoplePage     *m_peoplePage;
     Co2Page        *m_co2Page;
+    Pm25Page       *m_pm25Page;
+    SunshadePage   *m_sunshadePage;
+    FlamGasPage    *m_flamGasPage;
     FirePage       *m_firePage;
     AlarmPage      *m_alarmPage;
     AutoController *m_autoCtl;
