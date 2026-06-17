@@ -18,6 +18,7 @@
 #include "firepage.h"
 #include "alarmpage.h"
 #include "autocontrol.h"
+#include "voicepage.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -58,6 +59,7 @@ private:
     FirePage       *m_firePage;
     AlarmPage      *m_alarmPage;
     AutoController *m_autoCtl;
+    VoicePage      *m_voicePage;
     class QPushButton *m_btnAuto;
     class QLabel      *m_lblAutoStatus;
 };

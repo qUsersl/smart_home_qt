@@ -191,6 +191,19 @@ Widget::Widget(QWidget *parent)
     gridCloud->addWidget(btnFlamGas,  1, 2);
     homeLayout->addLayout(gridCloud);
 
+    homeLayout->addSpacing(8);
+
+    // ── 语音助手（独立分组）──
+    homeLayout->addWidget(makeSectionHeader("语音助手", "#1f8a4c", "按住说话发指令", homePage));
+
+    QGridLayout *gridVoice = new QGridLayout;
+    gridVoice->setSpacing(12);
+    gridVoice->setContentsMargins(0, 0, 0, 0);
+
+    QPushButton *btnVoice = makeCardButton("🎤", "语音助手", "hw", homePage);
+    gridVoice->addWidget(btnVoice, 0, 0);
+    homeLayout->addLayout(gridVoice);
+
     homeLayout->addSpacing(12);
 
     // ── 自动控制开关卡片 ──
@@ -296,6 +309,10 @@ Widget::Widget(QWidget *parent)
     m_flamGasPage = new FlamGasPage(mqtt);
     m_stack->addWidget(m_flamGasPage);  // index 12
 
+    // page 13：语音助手页
+    m_voicePage = new VoicePage(mqtt);
+    m_stack->addWidget(m_voicePage);    // index 13
+
     connect(btnLed,         &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(1); });
     connect(m_ledPage,      &LedPage::backRequested,      this, [this]{ m_stack->setCurrentIndex(0); });
     connect(btnFan,         &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(2); });
@@ -320,6 +337,8 @@ Widget::Widget(QWidget *parent)
     connect(m_sunshadePage, &SunshadePage::backRequested, this, [this]{ m_stack->setCurrentIndex(0); });
     connect(btnFlamGas,     &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(12); });
     connect(m_flamGasPage,  &FlamGasPage::backRequested,  this, [this]{ m_stack->setCurrentIndex(0); });
+    connect(btnVoice,       &QPushButton::clicked,        this, [this]{ m_stack->setCurrentIndex(13); });
+    connect(m_voicePage,    &VoicePage::backRequested,    this, [this]{ m_stack->setCurrentIndex(0); });
     // ─────────────────────────────────────────────────────
 
     // ── 自动控制器接线 ──

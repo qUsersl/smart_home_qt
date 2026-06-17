@@ -1,4 +1,4 @@
-QT       += core gui mqtt
+QT       += core gui mqtt multimedia network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,7 +24,11 @@ SOURCES += \
     firepage.cpp \
     alarmpage.cpp \
     autocontrol.cpp \
-    mqttconfig.cpp
+    mqttconfig.cpp \
+    voicepage.cpp \
+    audiocapture.cpp \
+    speechrecognition.cpp \
+    httppost.cpp
 
 HEADERS += \
     widget.h \
@@ -41,7 +45,11 @@ HEADERS += \
     firepage.h \
     alarmpage.h \
     autocontrol.h \
-    mqttconfig.h
+    mqttconfig.h \
+    voicepage.h \
+    audiocapture.h \
+    speechrecognition.h \
+    httppost.h
 
 FORMS += \
     widget.ui
